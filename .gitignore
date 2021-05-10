@@ -1,0 +1,10 @@
+/datasets/
+/models/
+/.vscode/
+/.ipynb_checkpoints/
+/__pycache__/
+
+*.ipynb
+*.xlsx
+*.pdf
+*.pyc
