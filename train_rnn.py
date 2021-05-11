@@ -37,11 +37,11 @@ TARG_MON = args.targetm # the target month of forcast[1,12]
 cmip_file_list = setting.CMIP_files
 soda_file_list = setting.SODA_files
 goda_file_list = setting.GODA_files
-chosen_idx = setting.sensor_64_0
+chosen_idx = setting.sensor_64_1
 save_dir = "./models/"
 
 
-model_name = "RNN"
+model_name = "RNN_v2"
 # model_name = "SNN_v2_ssim_L%d_T%d.pkl"
 
 # pre train by CMIP

@@ -1,5 +1,5 @@
 from ast import parse
-from networks.sensor2plot import shallow_decoder
+from networks.botnet import BotNet,PlotDataset
 from networks import utils
 from networks import utils_m
 from networks import ssim
@@ -36,13 +36,12 @@ TARG_MON = args.targetm # the target month of forcast[1,12]
 cmip_file_list = setting.CMIP_files
 soda_file_list = setting.SODA_files
 goda_file_list = setting.GODA_files
-# chosen_idx = setting.sensor_64_0
-chosen_idx = setting.sensor_64_1
+chosen_idx = setting.sensor_64_0
 save_dir = "./models/"
 
-# model_name = "SNN_v3_ssim_L%d_T%d.pkl" # use sensor from attention
+
+model_name = "SNN_v2_L%d_T%d.pkl"
 # model_name = "SNN_v2_ssim_L%d_T%d.pkl"
-model_name = "SNN_v4_L%d_T%d.pkl" 
 
 # pre train by CMIP
 pre_train_batch = 200
@@ -59,8 +58,7 @@ mask = np.load("./datasets/mask.npy")
 xmean_file = "./datasets/SODA_MON/soda_mean_m%d.npy"
 
 
-# model = shallow_decoder(24*72,3*len(chosen_idx))
-model = shallow_decoder(np.sum(mask),3*len(chosen_idx))
+model = shallow_decoder(24*72,3*len(chosen_idx))
 model = model.cuda()
 
 # pre_train_file = "./models/SNN_v1_ft_L%d_T%d.pkl"
@@ -74,8 +72,7 @@ for LEAD_MON in LEAD_MON_TASKS:# 12 mon
     
     ## pre train with CMIP
     cmip_train_set,cmip_target_set = utils_m.load_dataset(LEAD_MON,TARG_MON,cmip_file_list,xmean_file)
-    # CMIP_Dataset = utils.Sensor2PlotDataset(cmip_train_set*mask,cmip_target_set*mask,chosen_idx )
-    CMIP_Dataset = utils_m.Sensor2PlotWithdrawDataset(cmip_train_set*mask,cmip_target_set*mask,mask,chosen_idx )
+    CMIP_Dataset = utils.Sensor2PlotDataset(cmip_train_set,cmip_target_set,chosen_idx )
     data_loader = DataLoader(
         dataset = CMIP_Dataset, 
         batch_size = pre_train_batch, 
@@ -87,8 +84,7 @@ for LEAD_MON in LEAD_MON_TASKS:# 12 mon
 
     ## fine tuning with SODA
     soda_train_set,soda_target_set = utils_m.get_dataset_by_npy(LEAD_MON, TARG_MON, soda_file_list,xmean_file)
-    # SODA_Dataset = utils.Sensor2PlotDataset(soda_train_set*mask,soda_target_set*mask,chosen_idx )
-    SODA_Dataset = utils_m.Sensor2PlotWithdrawDataset(soda_train_set*mask,soda_target_set*mask,mask,chosen_idx )
+    SODA_Dataset = utils.Sensor2PlotDataset(soda_train_set*mask,soda_target_set*mask,chosen_idx )
     data_loader = DataLoader(
         dataset = SODA_Dataset, 
         batch_size = fine_tune_batch, 
