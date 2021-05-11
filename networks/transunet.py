@@ -102,7 +102,10 @@ class UnetBasic(nn.Module):
         self.up1 = UnetUp(layers[3]+layers[2],layers[2])
         self.up2 = UnetUp(layers[2]+layers[1],layers[1])
         self.up3 = UnetUp(layers[1]+layers[0],layers[0])
-        self.out = UnetBlock(layers[0],out_channels)
+        self.out = nn.Sequential(
+            UnetBlock(layers[0],layers[0]),
+            nn.Conv2d(layers[0],out_channels,1,1)
+        )
 
     def forward(self, x):
         x1 = self.input_layer(x)
@@ -128,11 +131,16 @@ class UnetTran(nn.Module):
       self.up1 = UnetUp(layers[3]+layers[2],layers[2])
       self.up2 = UnetUp(layers[2]+layers[1],layers[1])
       self.up3 = UnetUp(layers[1]+layers[0],layers[0])
-      self.out = UnetBlock(layers[0],out_channels)
+      self.out = nn.Sequential(
+            UnetBlock(layers[0],layers[0]),
+            nn.Conv2d(layers[0],out_channels,1,1)
+        )
 
-      ##
+      ## 
       self.tran1 = MHSARsd(layers[3],layers[3],3,9)
       self.tran2 = MHSARsd(layers[3],layers[3],3,9)
+      self.tran3 = MHSARsd(layers[3],layers[3],3,9)
+      self.tran4 = MHSARsd(layers[3],layers[3],3,9)
       ##
 
   def forward(self, x):
@@ -144,9 +152,11 @@ class UnetTran(nn.Module):
       ##
       t1 = self.tran1(x4)
       t2 = self.tran2(t1)
+      t3 = self.tran2(t2)
+      t4 = self.tran2(t3)
       ##
 
-      y1 = self.up1(t1,x3)
+      y1 = self.up1(t4,x3)
       y2 = self.up2(y1,x2)
       y3 = self.up3(y2,x1)
       return self.out(y3)
